@@ -27,13 +27,13 @@
  "name": "one"
  },
  {
- "seconds": 200,
+ "seconds": 2000,
  "name": "two"
  }
 ],
 "year": 2000,
-"title": "baz",
-"author": "joan",
+"title": "symphony",
+"author": "jojazzyan",
 "type": "cd"
  },
  {"price":99,"tracks":[{"seconds":180,"name":"one"},{"seconds":200,"name":"two"}],"year":2000,"title":"baz","author":"joan","type":"cd"},

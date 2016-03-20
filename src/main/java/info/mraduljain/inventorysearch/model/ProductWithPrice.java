@@ -5,11 +5,17 @@ import com.sun.xml.internal.bind.v2.runtime.RuntimeUtil.ToStringAdapter;
 public class ProductWithPrice implements Comparable<ProductWithPrice>{
 	private String name;
 	private Double price;
-	
+	private Object product;
 	public ProductWithPrice(String name, Double price) {
 		super();
 		this.name = name;
 		this.price = price;
+	}
+	public ProductWithPrice(String name, Double price, Object product) {
+		super();
+		this.name = name;
+		this.price = price;
+		this.product=product;
 	}
 	public String getName() {
 		return name;
@@ -29,6 +35,12 @@ public class ProductWithPrice implements Comparable<ProductWithPrice>{
 	}
 	
 	public String toString(){
-		return getName()+"-"+getPrice();
+		return getName()+"="+getPrice();
+	}
+	public Object getProduct() {
+		return product;
+	}
+	public void setProduct(Object product) {
+		this.product = product;
 	}
 }
