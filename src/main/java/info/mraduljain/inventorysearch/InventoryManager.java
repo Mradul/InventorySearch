@@ -23,12 +23,13 @@ import info.mraduljain.inventorysearch.model.ProductWithPrice;
 
 public class InventoryManager {
 
-	public JSONArray  readJson(String filename){
+	JSONArray productInventory;
+	
+	public void  readJsonFromFile(String filename){
 		
-		JSONArray jsonArray=null;
 		JSONParser parser = new JSONParser();
 			try {				
-				jsonArray = (JSONArray) parser.parse(new FileReader(filename));				
+				this.setProductInventory((JSONArray) parser.parse(new FileReader(filename)));				
 					
 			} catch (FileNotFoundException e) {
 				System.out.println("ERROR: File not foud - "+filename);
@@ -41,7 +42,7 @@ public class InventoryManager {
 				e.printStackTrace();
 			}	
 			
-			return jsonArray;
+			
 	}
 	
 	
@@ -50,9 +51,9 @@ public class InventoryManager {
 		InventoryManager im = new InventoryManager();
 		String filename="C:\\Project\\STS\\InventorySearch\\src\\main\\resources\\inventory.json";
 		//read input file into a string
-		JSONArray productInventory=im.readJson(filename);
+		im.readJsonFromFile(filename);
 		
-		Map<String,List<ProductWithPrice>> productTypes = im.getProductCategoryMap(productInventory);
+		Map<String,List<ProductWithPrice>> productTypes = im.getProductCategoryMap();
 		
 		int maxProds=2;
 		System.out.println(maxProds+" most expensive items from each category \n"+im.getMaxPricedProductsByCategory(productTypes,maxProds));
@@ -62,12 +63,12 @@ public class InventoryManager {
 		System.out.println("CDs that have total running time longer than "+thresholdMinutes+" minutes \n"
 							+im.getCDsWithGreaterRunTime(productTypes,thresholdMinutes*SEC_PER_MIN));
 			
-		System.out.println("Authors that authored CDs also - "+im.getAuthorsWithCD(productInventory));
+		System.out.println("Authors that authored CDs also - "+im.getAuthorsWithCD());
 		
 		//Q4  Which items have a title, track, or chapter that contains a year.
 		//Any set of digits starting with 1-9 considered as a year for simplicity. Although 1000000000 BC/AD might not be considered as a year, in reality, for example.
 		String pattern = "[1-9]\\d*";
-		JSONArray itemsContainingYear = im.getItemsContainingPattern(productInventory, pattern);
+		JSONArray itemsContainingYear = im.getItemsContainingPattern(pattern);
 		System.out.println("items having title, track, or chapter that contains a year -\n"+itemsContainingYear);
 		
 	}
@@ -113,7 +114,7 @@ public class InventoryManager {
 
 
 
-	public Map<String,List<ProductWithPrice>> getProductCategoryMap(JSONArray productInventory){
+	public Map<String,List<ProductWithPrice>> getProductCategoryMap(){
 		Map<String,List<ProductWithPrice>> productTypes = new HashMap<String,List<ProductWithPrice>>();
 		
 		for(Object obj:productInventory ){
@@ -159,12 +160,11 @@ public class InventoryManager {
 	
 	/**
 	 * Get all products that contain a pattern in either title, chapters, or tracks
-	 * @param productInventory - JSONArray of product inventory
 	 * @param pattern - pattern to be matched against title, chapters, or tracks of products
 	 * @return JSONArray of products containing the pattern
 	 */
 	@SuppressWarnings("unchecked")
-	public JSONArray getItemsContainingPattern(JSONArray productInventory, String pattern){
+	public JSONArray getItemsContainingPattern(String pattern){
 		
 				JSONArray itemsContainingYear = new JSONArray();
 				for(Object obj:productInventory ){
@@ -201,10 +201,9 @@ public class InventoryManager {
 	
 	/**
 	 * Get authors that have also authored CDs
-	 * @param productInventory - JSONArray of product inventory
 	 * @return Authors that have also authored CDs
 	 */
-	public Set<String> getAuthorsWithCD(JSONArray productInventory){
+	public Set<String> getAuthorsWithCD(){
 		Set<String> setOfCDAuthors = new HashSet<String>();
 		Set<String> setOfNonCDAuthors = new HashSet<String>();
 		for(Object obj:productInventory ){
@@ -219,4 +218,22 @@ public class InventoryManager {
 		setOfCDAuthors.retainAll(setOfNonCDAuthors);
 		return setOfCDAuthors;
 	}
+
+
+	/**
+	 * 
+	 * @return productInventory
+	 */
+	public JSONArray getProductInventory() {
+		return productInventory;
+	}
+	/**
+	 * 
+	 * @param productInventory to set
+	 */
+	public void setProductInventory(JSONArray productInventory) {
+		this.productInventory = productInventory;
+	}
+	
+	
 }
