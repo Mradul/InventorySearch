@@ -14,8 +14,6 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import javax.management.relation.RelationServiceNotRegisteredException;
-
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -47,7 +45,7 @@ public class InventoryManager {
 	}
 	
 	
-	@SuppressWarnings("unchecked")
+	
 	public static void main(String[] args) {
 		InventoryManager im = new InventoryManager();
 		String filename="C:\\Project\\STS\\InventorySearch\\src\\main\\resources\\inventory.json";
@@ -63,28 +61,14 @@ public class InventoryManager {
 		
 		System.out.println("CDs that have total running time longer than "+thresholdMinutes+" minutes \n"
 							+im.getCDsWithGreaterRunTime(productTypes,thresholdMinutes*SEC_PER_MIN));
-		
-		Set<String> setOfCDAuthors = new HashSet<String>();
-		Set<String> setOfNonCDAuthors = new HashSet<String>();
-		for(Object obj:productInventory ){
-			JSONObject prod= (JSONObject) obj;
-			String anAuthor=(String) prod.get("author");
-			if(prod.get("type").equals("cd")&& anAuthor!=null){
-				setOfCDAuthors.add(anAuthor);
-			}else if(anAuthor!=null){
-				setOfNonCDAuthors.add(anAuthor);
-			}
 			
-		}
-		setOfCDAuthors.retainAll(setOfNonCDAuthors);
-		
-		System.out.println("Authors that released CDs also - "+setOfCDAuthors);
+		System.out.println("Authors that authored CDs also - "+im.getAuthorsWithCD(productInventory));
 		
 		//Q4  Which items have a title, track, or chapter that contains a year.
 		//Any set of digits starting with 1-9 considered as a year for simplicity. Although 1000000000 BC/AD might not be considered as a year, in reality, for example.
 		String pattern = "[1-9]\\d*";
 		JSONArray itemsContainingYear = im.getItemsContainingPattern(productInventory, pattern);
-		System.out.println(itemsContainingYear);
+		System.out.println("items having title, track, or chapter that contains a year -\n"+itemsContainingYear);
 		
 	}
 	
@@ -179,6 +163,7 @@ public class InventoryManager {
 	 * @param pattern - pattern to be matched against title, chapters, or tracks of products
 	 * @return JSONArray of products containing the pattern
 	 */
+	@SuppressWarnings("unchecked")
 	public JSONArray getItemsContainingPattern(JSONArray productInventory, String pattern){
 		
 				JSONArray itemsContainingYear = new JSONArray();
@@ -188,13 +173,13 @@ public class InventoryManager {
 					
 					List<String> list;
 					if(this.regexTester(title, pattern)){
-						System.out.println("Title-"+title);
+						
 						itemsContainingYear.add(prod);
 					}else if((list= (List<String>) prod.get("chapters"))!=null){
 						//System.out.println(list);
 						for(String str:list){
 							if(this.regexTester( str, pattern)){
-								System.out.println("chapter-"+str);
+								
 								itemsContainingYear.add(prod);
 								continue;
 							}
@@ -204,7 +189,7 @@ public class InventoryManager {
 						for(Object ob:list){
 							JSONObject p= (JSONObject) ob;
 							if(this.regexTester( (String) p.get("name"), pattern)){
-								System.out.println("track-"+p.get("name"));
+								
 								itemsContainingYear.add(prod);
 								continue;
 							}
@@ -212,5 +197,26 @@ public class InventoryManager {
 					}
 				}
 				return itemsContainingYear;
+	}
+	
+	/**
+	 * Get authors that have also authored CDs
+	 * @param productInventory - JSONArray of product inventory
+	 * @return Authors that have also authored CDs
+	 */
+	public Set<String> getAuthorsWithCD(JSONArray productInventory){
+		Set<String> setOfCDAuthors = new HashSet<String>();
+		Set<String> setOfNonCDAuthors = new HashSet<String>();
+		for(Object obj:productInventory ){
+			JSONObject prod= (JSONObject) obj;
+			String anAuthor=(String) prod.get("author");
+			if(prod.get("type").equals("cd")&& anAuthor!=null){
+				setOfCDAuthors.add(anAuthor);
+			}else if(anAuthor!=null){
+				setOfNonCDAuthors.add(anAuthor);
+			}			
+		}
+		setOfCDAuthors.retainAll(setOfNonCDAuthors);
+		return setOfCDAuthors;
 	}
 }
