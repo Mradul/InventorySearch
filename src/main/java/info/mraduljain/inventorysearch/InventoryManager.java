@@ -47,6 +47,7 @@ public class InventoryManager {
 	}
 	
 	
+	@SuppressWarnings("unchecked")
 	public static void main(String[] args) {
 		InventoryManager im = new InventoryManager();
 		String filename="C:\\Project\\STS\\InventorySearch\\src\\main\\resources\\inventory.json";
@@ -80,8 +81,9 @@ public class InventoryManager {
 		System.out.println("Authors that released CDs also - "+setOfCDAuthors);
 		
 		//Q4  Which items have a title, track, or chapter that contains a year.
+		//Any set of digits starting with 1-9 considered as a year for simplicity. Although 1000000000 BC/AD might not be considered as a year, in reality, for example.
 		String pattern = "[1-9]\\d*";
-		
+		JSONArray itemsContainingYear = new JSONArray();
 		for(Object obj:productInventory ){
 			JSONObject prod= (JSONObject) obj;
 			String title=(String) prod.get("title");
@@ -89,11 +91,13 @@ public class InventoryManager {
 			List<String> list;
 			if(im.regexTester(title, pattern)){
 				System.out.println("Title-"+title);
+				itemsContainingYear.add(prod);
 			}else if((list= (List<String>) prod.get("chapters"))!=null){
 				//System.out.println(list);
 				for(String str:list){
 					if(im.regexTester( str, pattern)){
 						System.out.println("chapter-"+str);
+						itemsContainingYear.add(prod);
 						continue;
 					}
 				}
@@ -103,11 +107,13 @@ public class InventoryManager {
 					JSONObject p= (JSONObject) ob;
 					if(im.regexTester( (String) p.get("name"), pattern)){
 						System.out.println("track-"+p.get("name"));
+						itemsContainingYear.add(prod);
 						continue;
 					}
 				}
 			}
-		}		
+		}	
+		System.out.println(itemsContainingYear);
 		
 	}
 	
