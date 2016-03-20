@@ -1,6 +1,5 @@
 package info.mraduljain.inventorysearch;
 
-import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
@@ -26,7 +25,7 @@ import info.mraduljain.inventorysearch.model.ProductWithPrice;
 public class InventoryManager {
 
 	public JSONArray  readJson(String filename){
-		JSONObject jsonObject=null;
+		
 		JSONArray jsonArray=null;
 		JSONParser parser = new JSONParser();
 			try {				
@@ -47,8 +46,6 @@ public class InventoryManager {
 	}
 	
 	
-
-	@SuppressWarnings("unchecked")
 	public static void main(String[] args) {
 		InventoryManager im = new InventoryManager();
 		String filename="C:\\Project\\STS\\InventorySearch\\src\\main\\resources\\inventory.json";
@@ -56,14 +53,32 @@ public class InventoryManager {
 		JSONArray productInventory=im.readJson(filename);
 		
 		Map<String,List<ProductWithPrice>> productTypes = im.getProductCategoryMap(productInventory);
+		
 		//System.out.println(productTypes);
 		//Which cds have a total running time longer than 60 minutes?
-		System.out.println("5 most expensive items from each category \n"+im.getMaxPricedProductsByCategory(productTypes,2));
+		int maxProds=2;
+		System.out.println(maxProds+" most expensive items from each category \n"+im.getMaxPricedProductsByCategory(productTypes,maxProds));
 		int thresholdMinutes=60;
 		int SEC_PER_MIN=60;
 		
 		System.out.println("CDs that have total running time longer than "+thresholdMinutes+" minutes \n"
 							+im.getCDsWithGreaterRunTime(productTypes,thresholdMinutes*SEC_PER_MIN));
+		ReadContext rCtx=JsonPath.parse(productInventory);
+		List<String> allCDAuthors = rCtx.read("$..[?(@.type=='cd')].author");
+		Set<String> setOfCDAuthors = new HashSet<String>(allCDAuthors);
+		Set<String> authorsWithCD = new HashSet<String>();
+		for(Object obj:productInventory ){
+			JSONObject prod= (JSONObject) obj;
+			String anAuthor;
+			if(!prod.get("type").equals("cd")&& setOfCDAuthors.contains(anAuthor=(String) prod.get("author"))){
+				System.out.println(anAuthor);
+				authorsWithCD.add(anAuthor);
+			}
+			
+		}
+		
+		
+		System.out.println(authorsWithCD);
 		
 		
 	}
@@ -106,7 +121,6 @@ public class InventoryManager {
 	public Map<String,List<ProductWithPrice>> getProductCategoryMap(JSONArray productInventory){
 		Map<String,List<ProductWithPrice>> productTypes = new HashMap<String,List<ProductWithPrice>>();
 		
-		JSONObject newJson= new JSONObject();
 		for(Object obj:productInventory ){
 			JSONObject prod= (JSONObject) obj;
 			//JSONObject child= new JSONObject();
