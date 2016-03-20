@@ -10,6 +10,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import org.json.simple.JSONArray;
@@ -68,12 +69,14 @@ public class InventoryManager {
 	}
 	
 	public Map<String,List<JSONObject>> getMaxPricedProductsByCategory(Map<String,List<ProductWithPrice>> productTypes, int limit){
-		Iterator it = productTypes.entrySet().iterator();
+		Iterator<Entry<String, List<ProductWithPrice>>> it = productTypes.entrySet().iterator();
 		Map<String,List<JSONObject>> priceyProdsByCat = new HashMap<String,List<JSONObject>>();
 	    while (it.hasNext()) {
-	        Map.Entry keyVal = (Map.Entry)it.next();
+	        @SuppressWarnings("rawtypes")
+			Map.Entry keyVal = (Map.Entry)it.next();
 	        String productType = (String) keyVal.getKey();
-	        List<ProductWithPrice> productList = (List<ProductWithPrice>) keyVal.getValue();
+	        @SuppressWarnings("unchecked")
+			List<ProductWithPrice> productList = (List<ProductWithPrice>) keyVal.getValue();
 	        //get top <limit> priced products for current category 
 	        priceyProdsByCat.put(productType, this.getMaxPricedProducts(productList, limit));
 	    	       
