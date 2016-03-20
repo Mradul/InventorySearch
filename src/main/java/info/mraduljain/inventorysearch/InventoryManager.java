@@ -10,6 +10,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Scanner;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -25,6 +26,22 @@ public class InventoryManager {
 
 	JSONArray productInventory;
 	
+	public static void main(String[] args) {
+		Scanner kb = new Scanner(System.in);
+		System.out.println("Enter the filename to read inventory from(absolute path):");
+		String filename=kb.nextLine();
+		//String filename="C:\\Project\\STS\\InventorySearch\\src\\main\\resources\\inventory.json";
+		InventoryManager im = new InventoryManager();
+		//read input file into a json array
+		im.readJsonFromFile(filename);	
+		//print ans to questions
+		im.printAnsToQuestions();
+	}
+	
+	/**
+	 * Read file and store json objects into productInventory
+	 * @param filename - Name of the containing inventory
+	 */
 	public void  readJsonFromFile(String filename){
 		
 		JSONParser parser = new JSONParser();
@@ -40,45 +57,68 @@ public class InventoryManager {
 			}catch (ParseException e) {
 				System.out.println("ERROR: Error parsing file - "+filename+" to json");
 				e.printStackTrace();
-			}	
-			
-			
+			}			
 	}
 	
-	
-	
-	public static void main(String[] args) {
-		InventoryManager im = new InventoryManager();
-		String filename="C:\\Project\\STS\\InventorySearch\\src\\main\\resources\\inventory.json";
-		//read input file into a string
-		im.readJsonFromFile(filename);
+	/**
+	 * Print ans to the given questions
+	 */
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	public void printAnsToQuestions(){
+		Map<String,List<ProductWithPrice>> productTypes = this.getProductCategoryMap();
+		//1. What are the 5 most expensive items from each category?
+
+		int maxProds=5;
+		System.out.println("***What are the "+maxProds+" most expensive items from each category?***");
+		System.out.println(maxProds+" most expensive items from each category (map): \n"+this.getMaxPricedProductsByCategory(productTypes,maxProds));
 		
-		Map<String,List<ProductWithPrice>> productTypes = im.getProductCategoryMap();
-		
-		int maxProds=2;
-		System.out.println(maxProds+" most expensive items from each category \n"+im.getMaxPricedProductsByCategory(productTypes,maxProds));
+		//iterate over the map to print items for each category
+		Iterator<Entry<String, List<JSONObject>>> it = this.getMaxPricedProductsByCategory(productTypes,maxProds).entrySet().iterator();
+	    while (it.hasNext()) {	        
+			Map.Entry keyVal = (Map.Entry)it.next();
+	        String cat = (String) keyVal.getKey();
+			List<JSONObject> itemList = (List<JSONObject>) keyVal.getValue();  
+			System.out.println("Most expensive items in category - "+cat+" are: ");
+			System.out.println(itemList);
+	    }
+	    System.out.println("************************************************************************\n");
+	    
+	    //2. Which cds have a total running time longer than 60 minutes?
 		int thresholdMinutes=60;
 		int SEC_PER_MIN=60;
+		System.out.println("***Which cds have a total running time longer than "+thresholdMinutes+" minutes?***");
+		System.out.println("CDs that have total running time longer than "+thresholdMinutes+" minutes (array of items):\n"
+							+this.getCDsWithGreaterRunTime(productTypes,thresholdMinutes*SEC_PER_MIN));
+		System.out.println("************************************************************************\n");	
 		
-		System.out.println("CDs that have total running time longer than "+thresholdMinutes+" minutes \n"
-							+im.getCDsWithGreaterRunTime(productTypes,thresholdMinutes*SEC_PER_MIN));
-			
-		System.out.println("Authors that authored CDs also - "+im.getAuthorsWithCD());
+		//3. Which authors have also released cds?
+		System.out.println("***Which authors have also released cds?***");
+		System.out.println("Authors that authored CDs also: "+this.getAuthorsWithCD());
+		System.out.println("************************************************************************\n");
 		
-		//Q4  Which items have a title, track, or chapter that contains a year.
+		//4.  Which items have a title, track, or chapter that contains a year?		
+		System.out.println("***Which items have a title, track, or chapter that contains a year?***");
 		//Any set of digits starting with 1-9 considered as a year for simplicity. Although 1000000000 BC/AD might not be considered as a year, in reality, for example.
 		String pattern = "[1-9]\\d*";
-		JSONArray itemsContainingYear = im.getItemsContainingPattern(pattern);
-		System.out.println("items having title, track, or chapter that contains a year -\n"+itemsContainingYear);
-		
+		JSONArray itemsContainingYear = this.getItemsContainingPattern(pattern);
+		System.out.println("items having title, track, or chapter that contains a year (array of items):\n"+itemsContainingYear);
 	}
 	
+	/*
+	 * Test pattern for the given string and return true if matches, false otherwise
+	 */
 	private boolean regexTester(String str, String pattern){
 		Pattern p = Pattern.compile(pattern);
 		Matcher m = p.matcher(str);
 		return m.find();
 	}
 	
+	/**
+	 * Get given number of most priced products by category 
+	 * @param productTypes - Map of category and list of ProductWithPrice
+	 * @param limit - number of items to send back
+	 * @return Map of category and list of items
+	 */
 	public Map<String,List<JSONObject>> getMaxPricedProductsByCategory(Map<String,List<ProductWithPrice>> productTypes, int limit){
 		Iterator<Entry<String, List<ProductWithPrice>>> it = productTypes.entrySet().iterator();
 		Map<String,List<JSONObject>> priceyProdsByCat = new HashMap<String,List<JSONObject>>();
@@ -95,6 +135,12 @@ public class InventoryManager {
 	    return priceyProdsByCat;
 	}
 	
+	/*
+	 * Get given number of most priced products
+	 * @param productList
+	 * @param limit
+	 * @return
+	 */
 	private List<JSONObject> getMaxPricedProducts(List<ProductWithPrice> productList, int limit) {
 		 //Java 8 Lambda Expression
         productList.sort((p1, p2) -> { 
@@ -113,7 +159,10 @@ public class InventoryManager {
 	}
 
 
-
+	/**
+	 * Get map of category and list of ProductWithPrice
+	 * @return Map of category and list of ProductWithPrice
+	 */
 	public Map<String,List<ProductWithPrice>> getProductCategoryMap(){
 		Map<String,List<ProductWithPrice>> productTypes = new HashMap<String,List<ProductWithPrice>>();
 		
@@ -138,6 +187,12 @@ public class InventoryManager {
 		return productTypes;
 	}
 	
+	/**
+	 * Get cd items that have a total track time of more than given seconds
+	 * @param productTypes - Map of category and list of ProductWithPrice
+	 * @param thresholdTimeInSecs - Threshold in seconds
+	 * @return List of items
+	 */
 	public List<JSONObject> getCDsWithGreaterRunTime(Map<String,List<ProductWithPrice>> productTypes,int thresholdTimeInSecs){
 		List<ProductWithPrice> cdList=productTypes.get("cd");
 		List<JSONObject> cdListWithThresholdRuntime = new ArrayList<JSONObject>();
