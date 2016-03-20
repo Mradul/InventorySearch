@@ -63,24 +63,27 @@ public class InventoryManager {
 		
 		System.out.println("CDs that have total running time longer than "+thresholdMinutes+" minutes \n"
 							+im.getCDsWithGreaterRunTime(productTypes,thresholdMinutes*SEC_PER_MIN));
-		ReadContext rCtx=JsonPath.parse(productInventory);
-		List<String> allCDAuthors = rCtx.read("$..[?(@.type=='cd')].author");
-		Set<String> setOfCDAuthors = new HashSet<String>(allCDAuthors);
-		Set<String> authorsWithCD = new HashSet<String>();
+		
+		Set<String> setOfCDAuthors = new HashSet<String>();
+		Set<String> setOfNonCDAuthors = new HashSet<String>();
 		for(Object obj:productInventory ){
 			JSONObject prod= (JSONObject) obj;
-			String anAuthor;
-			if(!prod.get("type").equals("cd")&& setOfCDAuthors.contains(anAuthor=(String) prod.get("author"))){
-				System.out.println(anAuthor);
-				authorsWithCD.add(anAuthor);
+			String anAuthor=(String) prod.get("author");
+			if(prod.get("type").equals("cd")&& anAuthor!=null){
+				
+				//System.out.println(anAuthor);
+				setOfCDAuthors.add(anAuthor);
+			}else if(anAuthor!=null){
+				//System.out.println(anAuthor);
+				setOfNonCDAuthors.add(anAuthor);
 			}
 			
 		}
+		setOfCDAuthors.retainAll(setOfNonCDAuthors);
 		
+		System.out.println(setOfCDAuthors);
 		
-		System.out.println(authorsWithCD);
-		
-		
+		//&& setOfCDAuthors.contains(anAuthor=(String) prod.get("author"))
 	}
 	
 	public Map<String,List<JSONObject>> getMaxPricedProductsByCategory(Map<String,List<ProductWithPrice>> productTypes, int limit){
