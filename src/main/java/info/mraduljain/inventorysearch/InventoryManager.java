@@ -57,54 +57,51 @@ public class InventoryManager {
 		Map<String,List<ProductWithPrice>> productTypes = im.getProductCategoryMap(productInventory);
 		//System.out.println(productTypes);
 		//Which cds have a total running time longer than 60 minutes?
+		System.out.println("5 most expensive items from each category \n"+im.getMaxPricedProductsByCategory(productTypes,2));
 		int thresholdMinutes=60;
 		int SEC_PER_MIN=60;
+		
 		System.out.println("CDs that have total running time longer than "+thresholdMinutes+" minutes \n"
 							+im.getCDsWithGreaterRunTime(productTypes,thresholdMinutes*SEC_PER_MIN));
 		
+		
+	}
+	
+	public Map<String,List<JSONObject>> getMaxPricedProductsByCategory(Map<String,List<ProductWithPrice>> productTypes, int limit){
 		Iterator it = productTypes.entrySet().iterator();
+		Map<String,List<JSONObject>> priceyProdsByCat = new HashMap<String,List<JSONObject>>();
 	    while (it.hasNext()) {
 	        Map.Entry keyVal = (Map.Entry)it.next();
 	        String productType = (String) keyVal.getKey();
 	        List<ProductWithPrice> productList = (List<ProductWithPrice>) keyVal.getValue();
-	        
-	        //Java 8 Lambda Expression
-	        productList.sort((p1, p2) -> { 
-	        	//sort in desc
-				return p2.compareTo(p1);
-			});
-	        
-	        System.out.println(productType+"->"+productList);
-	     // avoid ConcurrentModificationException
-	        it.remove();
+	        //get top <limit> priced products for current category 
+	        priceyProdsByCat.put(productType, this.getMaxPricedProducts(productList, limit));
+	    	       
 	    }
-
+	    return priceyProdsByCat;
 	}
 	
-	public List<String> getMaxPricedProductsByCategory(List<Map<String, Object>> keyValuesForProd, int limit){
-		List<ProductWithPrice> ppList= new ArrayList<ProductWithPrice>();
-		for(Map<String, Object> aKeyVal : keyValuesForProd){
-			Double price =Double.parseDouble(""+aKeyVal.get("price")); 
-			String name =(String) aKeyVal.get("title");
-			ppList.add(new ProductWithPrice(name, price));
-		}
-		ppList.sort((p1, p2) -> { 
+	private List<JSONObject> getMaxPricedProducts(List<ProductWithPrice> productList, int limit) {
+		 //Java 8 Lambda Expression
+        productList.sort((p1, p2) -> { 
+        	//sort in desc
 			return p2.compareTo(p1);
 		});
-		List<String> listOfProductsByPriceDesc = new ArrayList<String>();
+        List<JSONObject> listOfProductsByPriceDesc = new ArrayList<JSONObject>();
 		
 		int i=0;
-		while( i<ppList.size() && i<limit){
-			listOfProductsByPriceDesc.add(ppList.get(i).getName());
+		while( i<productList.size() && i<limit){
+			listOfProductsByPriceDesc.add((JSONObject) productList.get(i).getProduct());
 			i++;
 		}
 		
 		return listOfProductsByPriceDesc;
 	}
-	
+
+
+
 	public Map<String,List<ProductWithPrice>> getProductCategoryMap(JSONArray productInventory){
 		Map<String,List<ProductWithPrice>> productTypes = new HashMap<String,List<ProductWithPrice>>();
-		System.out.println(productInventory.toJSONString());
 		
 		JSONObject newJson= new JSONObject();
 		for(Object obj:productInventory ){
@@ -133,14 +130,14 @@ public class InventoryManager {
 		List<JSONObject> cdListWithThresholdRuntime = new ArrayList<JSONObject>();
 		for(ProductWithPrice aCD:cdList){
 			JSONObject prod= (JSONObject) aCD.getProduct();
-			//System.out.println(prod.get("tracks"));
+			
 			JSONArray tracks=(JSONArray) prod.get("tracks");
 			int totalSeconds=0;
 			for(Object trk:tracks){
 				JSONObject aTrack= (JSONObject) trk;
 				totalSeconds+=Integer.parseInt(""+aTrack.get("seconds"));
 			}
-			System.out.println(totalSeconds);
+			
 			if(totalSeconds>thresholdTimeInSecs){
 				cdListWithThresholdRuntime.add(prod);
 			}
