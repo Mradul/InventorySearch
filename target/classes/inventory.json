@@ -37,5 +37,31 @@
 "type": "cd"
  },
  {"price":99,"tracks":[{"seconds":1800,"name":"one"},{"seconds":2100,"name":"two"}],"year":2000,"title":"baz","author":"joan","type":"cd"},
+  {"price":15,"tracks":[{"seconds":1800,"name":"one"},{"seconds":2100,"name":"two"}],"year":2000,"title":"rocking 10000 BC","author":"some","type":"cd"},
+  {"price":29,"tracks":[{"seconds":1800,"name":"one"},{"seconds":1800,"name":"two"}],"year":2000,"title":"year 2000","author":"someone","type":"cd"},
+  {
+"price": 15.99,
+"chapters": [
+ "one",
+ "rise of anthony 40 bc",
+ "three"
+],
+"year": 1999,
+"title": "caeser in 50 bc",
+"author": "some",
+"type": "book"
+ },
+ {
+"price": 15.99,
+"chapters": [
+ "",
+ "2014",
+ "three"
+],
+"year": 1999,
+"title": "foo",
+"author": "someone else",
+"type": "book"
+ },
  {"price":1,"tracks":[{"seconds":180,"name":"one"},{"seconds":200,"name":"two"}],"year":2000,"title":"baz","author":"joan","type":"cd"}
 ]

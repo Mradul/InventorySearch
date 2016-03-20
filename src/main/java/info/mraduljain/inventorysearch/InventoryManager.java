@@ -11,14 +11,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import javax.management.relation.RelationServiceNotRegisteredException;
 
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
-
-import com.jayway.jsonpath.JsonPath;
-import com.jayway.jsonpath.ReadContext;
 
 import info.mraduljain.inventorysearch.model.ProductWithPrice;
 
@@ -54,8 +55,6 @@ public class InventoryManager {
 		
 		Map<String,List<ProductWithPrice>> productTypes = im.getProductCategoryMap(productInventory);
 		
-		//System.out.println(productTypes);
-		//Which cds have a total running time longer than 60 minutes?
 		int maxProds=2;
 		System.out.println(maxProds+" most expensive items from each category \n"+im.getMaxPricedProductsByCategory(productTypes,maxProds));
 		int thresholdMinutes=60;
@@ -70,20 +69,52 @@ public class InventoryManager {
 			JSONObject prod= (JSONObject) obj;
 			String anAuthor=(String) prod.get("author");
 			if(prod.get("type").equals("cd")&& anAuthor!=null){
-				
-				//System.out.println(anAuthor);
 				setOfCDAuthors.add(anAuthor);
 			}else if(anAuthor!=null){
-				//System.out.println(anAuthor);
 				setOfNonCDAuthors.add(anAuthor);
 			}
 			
 		}
 		setOfCDAuthors.retainAll(setOfNonCDAuthors);
 		
-		System.out.println(setOfCDAuthors);
+		System.out.println("Authors that released CDs also - "+setOfCDAuthors);
 		
-		//&& setOfCDAuthors.contains(anAuthor=(String) prod.get("author"))
+		//Q4  Which items have a title, track, or chapter that contains a year.
+		String pattern = "[1-9]\\d*";
+		
+		for(Object obj:productInventory ){
+			JSONObject prod= (JSONObject) obj;
+			String title=(String) prod.get("title");
+			
+			List<String> list;
+			if(im.regexTester(title, pattern)){
+				System.out.println("Title-"+title);
+			}else if((list= (List<String>) prod.get("chapters"))!=null){
+				//System.out.println(list);
+				for(String str:list){
+					if(im.regexTester( str, pattern)){
+						System.out.println("chapter-"+str);
+						continue;
+					}
+				}
+			}else if((list= (List<String>) prod.get("tracks"))!=null){
+				//System.out.println(list);	
+				for(Object ob:list){
+					JSONObject p= (JSONObject) ob;
+					if(im.regexTester( (String) p.get("name"), pattern)){
+						System.out.println("track-"+p.get("name"));
+						continue;
+					}
+				}
+			}
+		}		
+		
+	}
+	
+	private boolean regexTester(String str, String pattern){
+		Pattern p = Pattern.compile(pattern);
+		Matcher m = p.matcher(str);
+		return m.find();
 	}
 	
 	public Map<String,List<JSONObject>> getMaxPricedProductsByCategory(Map<String,List<ProductWithPrice>> productTypes, int limit){
