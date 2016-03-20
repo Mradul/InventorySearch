@@ -83,36 +83,7 @@ public class InventoryManager {
 		//Q4  Which items have a title, track, or chapter that contains a year.
 		//Any set of digits starting with 1-9 considered as a year for simplicity. Although 1000000000 BC/AD might not be considered as a year, in reality, for example.
 		String pattern = "[1-9]\\d*";
-		JSONArray itemsContainingYear = new JSONArray();
-		for(Object obj:productInventory ){
-			JSONObject prod= (JSONObject) obj;
-			String title=(String) prod.get("title");
-			
-			List<String> list;
-			if(im.regexTester(title, pattern)){
-				System.out.println("Title-"+title);
-				itemsContainingYear.add(prod);
-			}else if((list= (List<String>) prod.get("chapters"))!=null){
-				//System.out.println(list);
-				for(String str:list){
-					if(im.regexTester( str, pattern)){
-						System.out.println("chapter-"+str);
-						itemsContainingYear.add(prod);
-						continue;
-					}
-				}
-			}else if((list= (List<String>) prod.get("tracks"))!=null){
-				//System.out.println(list);	
-				for(Object ob:list){
-					JSONObject p= (JSONObject) ob;
-					if(im.regexTester( (String) p.get("name"), pattern)){
-						System.out.println("track-"+p.get("name"));
-						itemsContainingYear.add(prod);
-						continue;
-					}
-				}
-			}
-		}	
+		JSONArray itemsContainingYear = im.getItemsContainingPattern(productInventory, pattern);
 		System.out.println(itemsContainingYear);
 		
 	}
@@ -200,5 +171,46 @@ public class InventoryManager {
 			}
 		}
 		return cdListWithThresholdRuntime;
+	}
+	
+	/**
+	 * Get all products that contain a pattern in either title, chapters, or tracks
+	 * @param productInventory - JSONArray of product inventory
+	 * @param pattern - pattern to be matched against title, chapters, or tracks of products
+	 * @return JSONArray of products containing the pattern
+	 */
+	public JSONArray getItemsContainingPattern(JSONArray productInventory, String pattern){
+		
+				JSONArray itemsContainingYear = new JSONArray();
+				for(Object obj:productInventory ){
+					JSONObject prod= (JSONObject) obj;
+					String title=(String) prod.get("title");
+					
+					List<String> list;
+					if(this.regexTester(title, pattern)){
+						System.out.println("Title-"+title);
+						itemsContainingYear.add(prod);
+					}else if((list= (List<String>) prod.get("chapters"))!=null){
+						//System.out.println(list);
+						for(String str:list){
+							if(this.regexTester( str, pattern)){
+								System.out.println("chapter-"+str);
+								itemsContainingYear.add(prod);
+								continue;
+							}
+						}
+					}else if((list= (List<String>) prod.get("tracks"))!=null){
+						//System.out.println(list);	
+						for(Object ob:list){
+							JSONObject p= (JSONObject) ob;
+							if(this.regexTester( (String) p.get("name"), pattern)){
+								System.out.println("track-"+p.get("name"));
+								itemsContainingYear.add(prod);
+								continue;
+							}
+						}
+					}
+				}
+				return itemsContainingYear;
 	}
 }
