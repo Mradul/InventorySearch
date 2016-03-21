@@ -99,7 +99,7 @@ public class InventoryManager {
 		//4.  Which items have a title, track, or chapter that contains a year?		
 		System.out.println("***Which items have a title, track, or chapter that contains a year?***");
 		//Any set of digits starting with 1-9 considered as a year for simplicity. Although 1000000000 BC/AD might not be considered as a year, in reality, for example.
-		String pattern = "[1-9]\\d*";
+		String pattern = "\\b[1-9]\\d*\\b";
 		JSONArray itemsContainingYear = this.getItemsContainingPattern(pattern);
 		System.out.println("items having title, track, or chapter that contains a year (array of items):\n"+itemsContainingYear);
 	}

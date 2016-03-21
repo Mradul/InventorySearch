@@ -15,7 +15,7 @@
 "price": 11.99,
 "minutes": 90,
 "year": 2004,
-"title": "bar",
+"title": "caeser in 50 bc",
 "director": "alan",
 "type": "dvd"
  },
@@ -43,11 +43,11 @@
 "price": 0,
 "chapters": [
  "one",
- "rise of anthony 40 bc",
+ "rise of anthony 040 bc",
  "three"
 ],
 "year": 1999,
-"title": "caeser in 50 bc",
+"title": "nothing here",
 "author": "alex",
 "type": "book"
  },

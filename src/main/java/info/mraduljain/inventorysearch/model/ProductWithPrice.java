@@ -1,7 +1,5 @@
 package info.mraduljain.inventorysearch.model;
 
-import com.sun.xml.internal.bind.v2.runtime.RuntimeUtil.ToStringAdapter;
-
 public class ProductWithPrice implements Comparable<ProductWithPrice>{
 	private String name;
 	private Double price;
